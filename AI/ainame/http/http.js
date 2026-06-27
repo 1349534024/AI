@@ -3,6 +3,32 @@
 // 动态获取环境：开发模式连接本地后端，发行模式连接线上域名
 const BASE_URL = "http://127.0.0.1:8000"
 
+const publicPages = [
+  '/pages/login/login',
+  '/pages/register/register',
+  '/pages/admin/login'
+];
+
+const getCurrentPagePath = () => {
+  const pages = getCurrentPages();
+  if (!pages || pages.length === 0) return '';
+  const route = pages[pages.length - 1].route || '';
+  return route ? '/' + route : '';
+};
+
+const clearLoginState = (redirectUrl = '/pages/login/login') => {
+  uni.removeStorageSync('token');
+  uni.removeStorageSync('user');
+  const currentPath = getCurrentPagePath();
+  if (publicPages.includes(currentPath)) return;
+  setTimeout(() => {
+    uni.reLaunch({ url: redirectUrl });
+  }, 800);
+};
+
+const isAuthError = (message = '') => {
+  return message.includes('Token') || message.includes('登录') || message.includes('权限') || message.includes('管理员');
+};
 
 /**
  * 核心请求封装函数
@@ -33,6 +59,12 @@ const request = (url, options) => {
           } else if (res.data && typeof res.data.detail === 'string') {
             // 捕获自定义的 HttpException 错误 
             errorMsg = res.data.detail;
+          }
+
+          if ((res.statusCode === 401 || res.statusCode === 403) && isAuthError(String(errorMsg))) {
+            const currentPath = getCurrentPagePath();
+            const redirectUrl = currentPath.startsWith('/pages/admin') ? '/pages/admin/login' : '/pages/login/login';
+            clearLoginState(redirectUrl);
           }
           
           // 统一弹窗报错，防止前端页面假死
@@ -92,6 +124,7 @@ export default {
   register: (data) => request("/auth/register", { method: 'POST', data }),
   login: (data) => request("/auth/login", { method: 'POST', data }),
   adminLogin: (data) => request("/admin/auth/login", { method: 'POST', data }),
+  logout: (redirectUrl = '/pages/login/login') => clearLoginState(redirectUrl),
   
   // ================= 2. 智能体核心工作流 =================
   // 首次起名 (无记忆)

@@ -1,15 +1,13 @@
 <script setup>
-import { onLaunch } from '@dcloudio/uni-app';
+import { onShow } from '@dcloudio/uni-app';
 
-onLaunch(() => {
-  // 1. 应用启动时，从本地缓存中读取身份凭证 (token)
+onShow(() => {
+  const publicPages = ['pages/login/login', 'pages/register/register', 'pages/admin/login'];
   const token = uni.getStorageSync('token');
-  
-  // 2. 如果不存在 token，说明未登录，强行拦截并跳转到登录页
-  if (!token) {
-    uni.reLaunch({
-      url: '/pages/login/login'
-    });
+  const pages = getCurrentPages();
+  const currentPage = pages.length ? pages[pages.length - 1].route : '';
+  if (!token && currentPage && !publicPages.includes(currentPage)) {
+    uni.reLaunch({ url: '/pages/login/login' });
   }
 });
 </script>

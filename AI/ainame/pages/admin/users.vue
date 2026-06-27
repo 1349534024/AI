@@ -1,5 +1,13 @@
 <template>
   <view class="page">
+    <view class="admin-topbar">
+      <view>
+        <view class="admin-title">用户管理</view>
+        <view class="admin-user">{{ currentUser.username || '管理员' }} {{ currentUser.email ? `/${currentUser.email}` : '' }}</view>
+      </view>
+      <button size="mini" class="logout-btn" @click="logoutAdmin">退出账号</button>
+    </view>
+
     <view class="toolbar">
       <input class="search-input" v-model="keyword" placeholder="搜索邮箱或用户名" confirm-type="search" @confirm="refreshUsers" />
       <button class="search-btn" size="mini" @click="refreshUsers">搜索</button>
@@ -96,6 +104,7 @@ const statusFilter = ref('');
 const loading = ref(false);
 const saving = ref(false);
 const loadError = ref('');
+const currentUser = ref(uni.getStorageSync('user') || {});
 const stats = ref({
   total: 0,
   active: 0,
@@ -117,12 +126,25 @@ const newPassword = ref('');
 
 const ensureAdmin = () => {
   const user = uni.getStorageSync('user') || {};
+  currentUser.value = user;
   if (!user.is_admin) {
     uni.showToast({ title: '需要管理员权限', icon: 'none' });
-    setTimeout(() => uni.navigateBack(), 800);
+    setTimeout(() => uni.reLaunch({ url: '/pages/admin/login' }), 800);
     return false;
   }
   return true;
+};
+
+const logoutAdmin = () => {
+  uni.showModal({
+    title: '退出账号',
+    content: '退出当前管理员账号并返回管理员登录页？',
+    success: (res) => {
+      if (res.confirm) {
+        http.logout('/pages/admin/login');
+      }
+    }
+  });
 };
 
 const loadUsers = async () => {
@@ -318,6 +340,11 @@ onPullDownRefresh(() => {
 
 <style scoped>
 .page { min-height: 100vh; background: #f4f6f8; padding: 24rpx; box-sizing: border-box; }
+.admin-topbar { display: flex; justify-content: space-between; align-items: center; background: #18202f; color: #fff; padding: 22rpx 24rpx; border-radius: 8rpx; margin-bottom: 20rpx; }
+.admin-title { font-size: 32rpx; font-weight: bold; }
+.admin-user { font-size: 24rpx; color: #c6d0df; margin-top: 6rpx; }
+.logout-btn { margin: 0; color: #18202f; background: #fff; }
+.logout-btn::after { border: none; }
 .toolbar { display: flex; align-items: center; gap: 16rpx; margin-bottom: 20rpx; }
 .search-input { flex: 1; background: #fff; border: 1px solid #d9e0e7; border-radius: 8rpx; padding: 18rpx 20rpx; font-size: 28rpx; box-sizing: border-box; }
 .search-btn { background: #1677ff; color: #fff; margin: 0; }

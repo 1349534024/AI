@@ -1,5 +1,13 @@
 <template>
   <view class="container">
+    <view class="account-bar">
+      <view>
+        <view class="account-name">{{ currentUser.username || '用户' }}</view>
+        <view class="account-email">{{ currentUser.email || '' }}</view>
+      </view>
+      <button size="mini" class="logout-btn" @click="switchAccount">切换账号</button>
+    </view>
+
     <view class="admin-entry" v-if="currentUser.is_admin" @click="goAdminUsers">
       <view>
         <view class="admin-title">管理后台</view>
@@ -93,6 +101,18 @@ const goAdminUsers = () => {
   uni.navigateTo({ url: '/pages/admin/users' });
 };
 
+const switchAccount = () => {
+  uni.showModal({
+    title: '切换账号',
+    content: '退出当前账号并返回登录页？',
+    success: (res) => {
+      if (res.confirm) {
+        http.logout('/pages/login/login');
+      }
+    }
+  });
+};
+
 // 上传专属知识库 (RAG)
 // 上传专属知识库 (RAG) - 兼容 Web 端
 const handleUploadDocs = () => {
@@ -174,6 +194,11 @@ const handleFeedback = async () => {
 
 <style scoped>
 .container { padding: 30rpx; background-color: #f5f7fa; min-height: 100vh; }
+.account-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #e5e7eb; padding: 20rpx 24rpx; border-radius: 12rpx; margin-bottom: 24rpx; }
+.account-name { font-size: 30rpx; font-weight: bold; color: #1f2937; }
+.account-email { font-size: 24rpx; color: #667085; margin-top: 4rpx; }
+.logout-btn { margin: 0; color: #1677ff; background: #eef5ff; }
+.logout-btn::after { border: none; }
 .admin-entry { display: flex; justify-content: space-between; align-items: center; background: #18202f; color: #fff; padding: 24rpx; border-radius: 12rpx; margin-bottom: 24rpx; }
 .admin-title { font-size: 32rpx; font-weight: bold; }
 .admin-desc { font-size: 24rpx; color: #c6d0df; margin-top: 6rpx; }
