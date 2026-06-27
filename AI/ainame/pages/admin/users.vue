@@ -9,7 +9,9 @@
     </view>
 
     <view class="toolbar">
-      <input class="search-input" v-model="keyword" placeholder="搜索邮箱或用户名" confirm-type="search" @confirm="refreshUsers" />
+      <view class="search-wrap">
+        <input class="search-input" v-model="keyword" type="text" placeholder="搜索邮箱或用户名" confirm-type="search" @confirm="refreshUsers" />
+      </view>
       <button class="search-btn" size="mini" @click="refreshUsers">搜索</button>
     </view>
 
@@ -346,7 +348,8 @@ onPullDownRefresh(() => {
 .logout-btn { margin: 0; color: #18202f; background: #fff; }
 .logout-btn::after { border: none; }
 .toolbar { display: flex; align-items: center; gap: 16rpx; margin-bottom: 20rpx; }
-.search-input { flex: 1; background: #fff; border: 1px solid #d9e0e7; border-radius: 8rpx; padding: 18rpx 20rpx; font-size: 28rpx; box-sizing: border-box; }
+.search-wrap { flex: 1; height: 72rpx; background: #fff; border: 1px solid #d9e0e7; border-radius: 8rpx; padding: 0 20rpx; box-sizing: border-box; display: flex; align-items: center; }
+.search-input { width: 100%; height: 68rpx; line-height: 68rpx; font-size: 28rpx; color: #111827; }
 .search-btn { background: #1677ff; color: #fff; margin: 0; }
 .filters { display: flex; background: #fff; border: 1px solid #d9e0e7; border-radius: 8rpx; overflow: hidden; margin-bottom: 20rpx; }
 .filter-item { flex: 1; text-align: center; padding: 18rpx 0; font-size: 26rpx; color: #4e5969; }
