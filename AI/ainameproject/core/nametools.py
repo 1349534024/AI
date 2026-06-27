@@ -10,7 +10,7 @@ from langchain_core.prompts import ChatPromptTemplate
 # 开发起名智能体
 llm = ChatDeepSeek(
     model="deepseek-chat",
-    api_key=SecretStr(os.getenv("DEEPSEEK_API_KEY","")),
+    api_key=SecretStr(os.getenv("DEEPSEEK_API_KEY","missing-deepseek-api-key")),
     # 为了让模型返回数据的时候根据我们给定的格式输出，所以稍微低一点
     temperature=0.5,
     timeout=120

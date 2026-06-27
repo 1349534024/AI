@@ -27,7 +27,7 @@ class WorkFlowState(TypedDict):
 
 llm = ChatDeepSeek(
     model="deepseek-chat",
-    api_key=SecretStr(os.getenv("DEEPSEEK_API_KEY","")),
+    api_key=SecretStr(os.getenv("DEEPSEEK_API_KEY","missing-deepseek-api-key")),
     temperature=0.5
 )
 

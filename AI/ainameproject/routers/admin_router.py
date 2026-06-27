@@ -7,7 +7,7 @@ from core.auth import AuthHandler
 from dependencies import get_session
 from models.user import User
 from repository.user_repo import UserRepository
-from schemas.user_schemas import AdminResetPasswordIn, AdminUserListOut, AdminUserOut, AdminUserUpdateIn
+from schemas.user_schemas import AdminResetPasswordIn, AdminUserListOut, AdminUserOut, AdminUserUpdateIn, LoginIn, LoginOut
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -37,6 +37,28 @@ async def get_current_admin(
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="需要管理员权限")
     return user
+
+
+@router.post("/auth/login", response_model=LoginOut)
+async def admin_login(
+    userinfo: LoginIn,
+    session: AsyncSession = Depends(get_session),
+):
+    user_repository = UserRepository(session=session)
+    user = await user_repository.get_user_by_email(userinfo.email)
+    if not user:
+        raise HTTPException(status_code=400, detail="管理员账号不存在")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="管理员账号已被冻结")
+    if not user.check_password(userinfo.password):
+        raise HTTPException(status_code=400, detail="密码输入错误，请核对后输入")
+    if not user.is_admin:
+        raise HTTPException(status_code=403, detail="该账号不是管理员账号")
+    tokens = auth_handler.encode_login_token(user.id)
+    return {
+        "user": serialize_user(user),
+        "token": tokens["access_token"],
+    }
 
 
 @router.get("/users", response_model=AdminUserListOut)

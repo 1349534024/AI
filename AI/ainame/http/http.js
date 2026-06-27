@@ -91,6 +91,7 @@ export default {
   getEmailCode: (email) => request("/auth/code?email=" + email, { method: 'GET' }),
   register: (data) => request("/auth/register", { method: 'POST', data }),
   login: (data) => request("/auth/login", { method: 'POST', data }),
+  adminLogin: (data) => request("/admin/auth/login", { method: 'POST', data }),
   
   // ================= 2. 智能体核心工作流 =================
   // 首次起名 (无记忆)

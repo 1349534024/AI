@@ -5,6 +5,7 @@
     <input class="input-box" v-model="form.password" type="password" placeholder="请输入密码" />
     <button class="btn" :loading="loading" @click="handleLogin">登录</button>
     <view class="link" @click="goRegister">没有账号？去注册</view>
+    <view class="admin-link" @click="goAdminLogin">管理员登录</view>
   </view>
 </template>
 
@@ -32,6 +33,7 @@ const handleLogin = async () => {
 }
 
 const goRegister = () => uni.navigateTo({ url: '/pages/register/register' });
+const goAdminLogin = () => uni.navigateTo({ url: '/pages/admin/login' });
 </script>
 
 <style scoped>
@@ -40,4 +42,5 @@ const goRegister = () => uni.navigateTo({ url: '/pages/register/register' });
 .input-box { border-bottom: 1px solid #eee; padding: 20rpx 0; margin-bottom: 30rpx; }
 .btn { background-color: #007AFF; color: white; margin-top: 40rpx; }
 .link { text-align: center; color: #007AFF; margin-top: 20rpx; font-size: 28rpx; }
+.admin-link { text-align: center; color: #333; margin-top: 40rpx; font-size: 26rpx; }
 </style>
