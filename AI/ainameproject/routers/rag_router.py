@@ -1,0 +1,66 @@
+import os
+import shutil
+import json
+from fastapi import APIRouter, UploadFile, File, BackgroundTasks, Depends
+import aio_pika
+from core.auth import AuthHandler
+
+auth_handler = AuthHandler()
+router = APIRouter(prefix="/knowledge", tags=["知识库"])
+
+# 上传文件存储目录
+UPLOAD_DIR = "./uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# RabbitMQ 连接配置 协议://用户名:密码@主机地址:端口号
+RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@127.0.0.1:5672/")
+QUEUE_NAME = "rag_document_queue"
+
+
+async def send_to_queue(message_dict: dict):
+    """异步将任务发送到 RabbitMQ 队列"""
+    connection = await aio_pika.connect_robust(RABBITMQ_URL)
+    async with connection:
+        channel = await connection.channel()
+        # declare_queue，如果没有则自动创建；durable=True 开启持久化，服务重启消息不丢失
+        queue = await channel.declare_queue(QUEUE_NAME, durable=True)
+        # 将任务字典转为 JSON 字节流发送
+        message_body = json.dumps(message_dict).encode("utf-8")
+        # 调用默认交换机，发布消息
+        await channel.default_exchange.publish(
+            aio_pika.Message(body=message_body),
+            # 路由键与队列名称保持一致
+            routing_key=queue.name,
+        )
+
+
+from core.rag_service import process_and_stor_file
+
+
+@router.post("/upload")
+async def upload_file(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    user_id: int = Depends(auth_handler.auth_access_dependency)
+):
+    """
+    用户上传专属参考文件（TXT/PDF）
+    """
+    # 第一步：完成文件在服务器的保存
+    file_path = os.path.join(UPLOAD_DIR, f"{user_id}_{file.filename}")
+    # 转换为绝对路径
+    absolute_path = os.path.abspath(file_path)
+    with open(absolute_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # 第二步：构造任务消息投递到MQ队列
+    task_message = {
+        "user_id": user_id,
+        "file_path": absolute_path
+    }
+    await send_to_queue(task_message)
+
+    return {
+        "result": "success",
+        "message": f"文件 {file.filename} 上传成功！后台正在为您构建专属知识库，请稍候测试起名功能。"
+    }
