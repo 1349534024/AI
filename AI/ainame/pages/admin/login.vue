@@ -3,8 +3,12 @@
     <view class="panel">
       <view class="title">管理员登录</view>
       <view class="subtitle">运营与研发后台</view>
-      <input class="input-box" v-model="form.email" placeholder="请输入管理员邮箱" />
-      <input class="input-box" v-model="form.password" type="password" placeholder="请输入管理员密码" />
+      <view class="input-wrap">
+        <input class="input-field" v-model="form.email" type="text" placeholder="请输入管理员邮箱" />
+      </view>
+      <view class="input-wrap">
+        <input class="input-field" v-model="form.password" type="password" placeholder="请输入管理员密码" />
+      </view>
       <button class="btn" :loading="loading" @click="handleAdminLogin">进入后台</button>
       <view class="normal-link" @click="goUserLogin">返回普通用户登录</view>
     </view>
@@ -51,7 +55,8 @@ const goUserLogin = () => {
 .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8rpx; padding: 44rpx 36rpx; box-sizing: border-box; }
 .title { font-size: 44rpx; font-weight: bold; color: #111827; text-align: center; }
 .subtitle { font-size: 26rpx; color: #667085; text-align: center; margin-top: 12rpx; margin-bottom: 56rpx; }
-.input-box { border: 1px solid #d9e0e7; border-radius: 8rpx; padding: 22rpx 20rpx; margin-bottom: 24rpx; font-size: 28rpx; box-sizing: border-box; }
+.input-wrap { width: 100%; height: 84rpx; border: 1px solid #d9e0e7; border-radius: 8rpx; margin-bottom: 24rpx; padding: 0 20rpx; box-sizing: border-box; background: #fff; display: flex; align-items: center; }
+.input-field { width: 100%; height: 80rpx; line-height: 80rpx; font-size: 28rpx; color: #111827; }
 .btn { background: #18202f; color: #fff; margin-top: 32rpx; border-radius: 8rpx; }
 .normal-link { text-align: center; color: #1677ff; margin-top: 30rpx; font-size: 26rpx; }
 </style>
